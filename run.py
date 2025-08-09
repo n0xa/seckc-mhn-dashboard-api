@@ -1,10 +1,11 @@
-'''RUN seckc hpfeeds api
-'''
+"""Run SecKC MHN Dashboard API."""
+import os
 from seckc_mhn_api.api_base import APP, SOCKET_IO_APP
 
-SOCKET_IO_APP.run(APP)
-
-# APP.config["host"] = '0.0.0.0'
-# APP.config["port"] = 5000
-# APP.config["debug"] = True
-#SOCKET_IO_APP.run(APP,host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('DEBUG', 'False').lower() == 'true'
+    
+    print(f"Starting SecKC MHN API server on {host}:{port}")
+    SOCKET_IO_APP.run(APP, host=host, port=port, debug=debug)
