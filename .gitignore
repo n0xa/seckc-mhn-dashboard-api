@@ -2,10 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+seckc_mhn_api.env
 # C extensions
 *.so
-
+logs/
 # Distribution / packaging
 .Python
 env/
