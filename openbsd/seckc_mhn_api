@@ -1,63 +1,15 @@
 #!/bin/ksh
-# /etc/rc.d/seckc_mhn_api - OpenBSD init script for SecKC MHN Dashboard API
+# /etc/rc.d/chn init file for launching seckc_mhn_api as a service on OpenBSD 
 
-daemon="/opt/chnserver/seckc-mhn-dashboard-api/openbsd/seckc_mhn_api_wrapper.sh"
+daemon="/opt/chnserver/seckc-mhn-dashboard-api/venv/bin/uwsgi"
+daemon_flags="--ini /opt/chnserver/seckc-mhn-dashboard-api/uwsgi.ini  --daemonize /opt/chnserver/seckc-mhn-dashboard-api/logs/uwsgi.log"
 daemon_user="chn"
 daemon_timeout=30
 
 . /etc/rc.d/rc.subr
 
-pexp="python.*run.py"
+pexp=".*uwsgi.*seckc_mhn_dashboard_api.*"
 rc_bg=YES
 rc_reload=NO
-
-rc_pre() {
-    # Check for virtual environment
-    if [ ! -d /opt/chnserver/seckc-mhn-dashboard-api/venv ]; then
-        echo "Python virtual environment not found. Please run:"
-        echo "  /opt/chnserver/seckc-mhn-dashboard-api/openbsd/seckc_mhn_api_wrapper.sh setup"
-        return 1
-    fi
-    
-    # Create log directory if it doesn't exist
-    if [ ! -d /opt/chnserver/seckc-mhn-dashboard-api/logs ]; then
-        mkdir -p /var/log/seckc-mhn-api
-        chown "$daemon_user:$daemon_user" /opt/chnserver/seckc-mhn-dashboard-api/logs
-        chmod 755 /opt/chnserver/seckc-mhn-dashboard-api/logs
-    fi
-    
-    # Set environment variables for the service
-    export SECRET_KEY="${SECRET_KEY:-$(openssl rand -hex 32)}"
-    export CHN_AUTH_URL="${CHN_AUTH_URL:-http://localhost:8000/auth/me/}"
-    export CHN_SENSOR_URL="${CHN_SENSOR_URL:-http://localhost:8000/api/sensors/}"
-    export CHN_ATTACKERS_URL="${CHN_ATTACKERS_URL:-http://localhost:8000/api/top_attackers/}"
-    export CHN_ATTACKER_STATS_URL="${CHN_ATTACKER_STATS_URL:-http://localhost:8000/api/attacker_stats/}"
-    export MONGO_HOST="${MONGO_HOST:-localhost}"
-    export MONGO_PORT="${MONGO_PORT:-27017}"
-    export MONGO_DB="${MONGO_DB:-mnemosyne}"
-    export HPFEEDS_HOST="${HPFEEDS_HOST:-localhost}"
-    export HPFEEDS_PORT="${HPFEEDS_PORT:-10000}"
-    
-    # Check GeoIP database
-    if [ ! -f /opt/chnserver/seckc-mhn-dashboard-api/geodatabase/GeoLite2-City.mmdb ]; then
-        echo "Warning: GeoIP database not found"
-        echo "Download GeoLite2-City.mmdb from MaxMind and place in:"
-        echo "  /opt/chnserver/seckc-mhn-dashboard-api/geodatabase/"
-    fi
-}
-
-rc_post() {
-    # Wait a moment for the service to start up
-    sleep 2
-    
-    # Check if the service is responding
-    if command -v curl >/dev/null 2>&1; then
-        if curl -s http://localhost:5000/auth/me >/dev/null; then
-            echo "SecKC MHN Dashboard API is responding on port 5000"
-        else
-            echo "Warning: SecKC MHN Dashboard API may not be responding properly"
-        fi
-    fi
-}
 
 rc_cmd $1
