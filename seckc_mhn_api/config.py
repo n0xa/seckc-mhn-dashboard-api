@@ -1,9 +1,18 @@
 """Simple Base API config loader"""
-from os import environ as environment
+import os
 import yaml
+from pathlib import Path
 
-HOME = environment["HOME"]
-CONFIG_PATH = HOME + "/data/seckc_mhn_api/shared/config/settings.yaml"
+HOME = os.environ.get("HOME", "/tmp")
+CONFIG_PATH = Path(HOME) / "data" / "seckc_mhn_api" / "shared" / "config" / "settings.yaml"
 
-with open(CONFIG_PATH, "r") as f:
-    SETTINGS = yaml.load(f)
+try:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+        SETTINGS = yaml.safe_load(f)
+except FileNotFoundError:
+    print(f"Config file not found: {CONFIG_PATH}")
+    SETTINGS = {
+        "hpfeeds": {"host": "localhost", "port": 10000, "channels": [], "user": "", "token": ""},
+        "mnemosyne": {"username": "", "password": ""},
+        "mhn": {"apikey": ""}
+    }
