@@ -94,7 +94,7 @@ def getattackers():
         api_key = os.environ.get("CHN_APIKEY", SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", "")))
         
         
-        attacker_url = f"{CHN_ATTACKERS_URL}?hours_ago={hours_ago}&api_key={api_key}"
+        attacker_url = f"{CHN_ATTACKERS_URL}?hours_ago={hours_ago}"
         
         top_attacker_request = requests.get(
             attacker_url, 
@@ -120,7 +120,7 @@ def getattackerstats(ip):
     """Get statistics for a specific attacker IP."""
     try:
         api_key = os.environ.get("CHN_APIKEY", SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", "")))
-        attacker_stat_url = f"{CHN_ATTACKER_STATS_URL}{ip}/?api_key={api_key}"
+        attacker_stat_url = f"{CHN_ATTACKER_STATS_URL}{ip}/"
         
         attacker_request = requests.get(
             attacker_stat_url, 
