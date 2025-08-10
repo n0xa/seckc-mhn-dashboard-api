@@ -56,7 +56,7 @@ CHN_ATTACKER_STATS_URL = os.environ.get('CHN_ATTACKER_STATS_URL', 'http://localh
 @STATS_MODULE.route("/attacks", methods=['GET'])
 def getstats():
     """Get attack statistics from MongoDB."""
-    if not db:
+    if db is None:
         return jsonify({"error": "Database connection unavailable"}), 500
     
     try:
