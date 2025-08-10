@@ -11,6 +11,27 @@ import certifi
 
 STATS_MODULE = Blueprint('stats', __name__, url_prefix='/stats')
 
+# Load environment variables manually from .env file since uWSGI env-file isn't working
+def load_env_file(env_file_path):
+    """Load environment variables from file."""
+    env_vars = {}
+    try:
+        with open(env_file_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    env_vars[key] = value
+                    os.environ[key] = value
+        return env_vars
+    except Exception as e:
+        print(f"Failed to load environment file {env_file_path}: {e}")
+        return {}
+
+# Load environment variables
+env_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', 'seckc_mhn_api.env')
+load_env_file(env_file_path)
+
 # MongoDB connection with error handling
 try:
     mongo_host = os.environ.get('MONGO_HOST', 'localhost')
@@ -70,9 +91,10 @@ def getattackers():
     """Get top attackers from CHN server."""
     try:
         hours_ago = request.args.get('hours_ago', default=24, type=int)
-        api_key = SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", ""))
+        api_key = os.environ.get("CHN_APIKEY", SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", "")))
         
-        attacker_url = f"{CHN_ATTACKERS_URL}?hours_ago={hours_ago}&api_key={api_key}"
+        
+        attacker_url = f"{CHN_ATTACKERS_URL}?hours_ago={hours_ago}"
         
         top_attacker_request = requests.get(
             attacker_url, 
@@ -97,8 +119,8 @@ def getattackers():
 def getattackerstats(ip):
     """Get statistics for a specific attacker IP."""
     try:
-        api_key = SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", ""))
-        attacker_stat_url = f"{CHN_ATTACKER_STATS_URL}{ip}/?api_key={api_key}"
+        api_key = os.environ.get("CHN_APIKEY", SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", "")))
+        attacker_stat_url = f"{CHN_ATTACKER_STATS_URL}{ip}/"
         
         attacker_request = requests.get(
             attacker_stat_url, 

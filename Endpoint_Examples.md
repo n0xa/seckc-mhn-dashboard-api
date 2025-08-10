@@ -67,6 +67,26 @@ List available channels:
 curl http://localhost:5000/feeds/channels
 ```
 
+Get recent HPFeeds events (REST alternative to WebSocket):
+```bash
+curl http://localhost:5000/feeds/events/recent
+```
+
+Get recent events with limit:
+```bash
+curl http://localhost:5000/feeds/events/recent?limit=10
+```
+
+Get events since specific timestamp:
+```bash
+curl http://localhost:5000/feeds/events/recent?since=1754784000.0
+```
+
+<!-- Inject test event (development/testing only):
+```bash
+curl -X POST http://localhost:5000/feeds/test/inject
+``` -->
+
 ## Getting Started
 
 Start by testing the basic API status:

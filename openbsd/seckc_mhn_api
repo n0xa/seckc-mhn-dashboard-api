@@ -8,7 +8,7 @@ daemon_timeout=30
 
 . /etc/rc.d/rc.subr
 
-pexp=".*uwsgi.*seckc_mhn_dashboard_api.*"
+pexp=".*uwsgi.*seckc-mhn-dashboard-api.*"
 rc_bg=YES
 rc_reload=NO
 

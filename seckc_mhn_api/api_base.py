@@ -19,11 +19,13 @@ from seckc_mhn_api.sensors.controllers import SENSORS_MODULE
 import seckc_mhn_api.feeds.hpfeed_relay
 seckc_mhn_api.feeds.hpfeed_relay.start()
 import seckc_mhn_api.feeds.controllers
+from seckc_mhn_api.feeds.controllers import FEEDS_MODULE
 
 APP.register_blueprint(AUTH_MODULE)
 APP.register_blueprint(GEOCODE_MODULE)
 APP.register_blueprint(STATS_MODULE)  
 APP.register_blueprint(SENSORS_MODULE)
+APP.register_blueprint(FEEDS_MODULE)
 
 @APP.after_request
 def manage_security_headers(response):
