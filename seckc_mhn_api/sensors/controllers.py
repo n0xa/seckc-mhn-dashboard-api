@@ -17,7 +17,7 @@ def sensors():
     """Get sensor locations with geocoding."""
     try:
         # Use CHN API endpoint instead of old MHN
-        api_key = SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", ""))
+        api_key = os.environ.get("CHN_APIKEY", SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", "")))
         sensor_url = f"{CHN_SENSOR_URL}?api_key={api_key}"
         
         sensor_request = requests.get(

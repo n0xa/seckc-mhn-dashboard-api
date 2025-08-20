@@ -2,7 +2,7 @@ Flask==3.0.3
 Flask-CORS==5.0.0
 Flask-SocketIO==5.4.1
 geoip2==4.8.0
-git+https://github.com/n0xa/hpfeeds3.git
+git+https://github.com/n0xa/hpfeeds3.git#egg=hpfeeds3
 pymongo==4.10.1
 PyYAML==6.0.2
 requests==2.32.3

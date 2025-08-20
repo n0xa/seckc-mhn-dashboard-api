@@ -21,35 +21,17 @@ except ImportError:
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
-# Load environment variables manually from .env file since uWSGI env-file isn't working
-def load_env_file(env_file_path):
-    """Load environment variables from file."""
-    env_vars = {}
-    try:
-        with open(env_file_path, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, value = line.split('=', 1)
-                    env_vars[key] = value
-                    os.environ[key] = value
-        return env_vars
-    except Exception as e:
-        logger.error(f"Failed to load environment file {env_file_path}: {e}")
-        return {}
+# Environment variables are loaded by uWSGI (env-file) or Docker Compose (env_file)
+# No manual file reading required
 
-# Load environment variables
-env_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', 'seckc_mhn_api.env')
-env_vars = load_env_file(env_file_path)
-
-# HPFeeds configuration with proper fallbacks (environment variables take precedence over empty SETTINGS values)
+# HPFeeds configuration with proper fallbacks (environment variables take precedence over SETTINGS values)
 HPFEEDS_CONFIG = SETTINGS.get("hpfeeds", {})
-HOST = HPFEEDS_CONFIG.get("host") or os.environ.get("HPFEEDS_HOST", "localhost")
-PORT = HPFEEDS_CONFIG.get("port") or int(os.environ.get("HPFEEDS_PORT", "10000"))
-CHANNELS_STR = HPFEEDS_CONFIG.get("channels") or os.environ.get("HPFEEDS_CHANNELS", "")
+HOST = os.environ.get("HPFEEDS_HOST") or HPFEEDS_CONFIG.get("host", "localhost")
+PORT = int(os.environ.get("HPFEEDS_PORT") or HPFEEDS_CONFIG.get("port") or "10000")
+CHANNELS_STR = os.environ.get("HPFEEDS_CHANNELS") or HPFEEDS_CONFIG.get("channels", "")
 CHANNELS = CHANNELS_STR.split(",") if CHANNELS_STR else []
-IDENT = HPFEEDS_CONFIG.get("user") or os.environ.get("HPFEEDS_USER", "")
-SECRET = HPFEEDS_CONFIG.get("token") or os.environ.get("HPFEEDS_SECRET", "")
+IDENT = os.environ.get("HPFEEDS_USER") or HPFEEDS_CONFIG.get("user", "")
+SECRET = os.environ.get("HPFEEDS_SECRET") or HPFEEDS_CONFIG.get("token", "")
 
 # Socket.IO connection settings
 SOCKETIO_HOST = os.environ.get("SOCKETIO_HOST", "127.0.0.1")
@@ -58,17 +40,8 @@ SOCKETIO_PORT = int(os.environ.get("SOCKETIO_PORT", "5000"))
 def main():
     """Main HPFeeds relay function."""
     try:
-        # Try to import hpfeeds3 first, fall back to hpfeeds
-        try:
-            import hpfeeds3
-            hpc = hpfeeds3.new(HOST, PORT, IDENT, SECRET)
-        except ImportError:
-            try:
-                import hpfeeds
-                hpc = hpfeeds.new(HOST, PORT, IDENT, SECRET)
-            except ImportError:
-                logger.error("Neither hpfeeds3 nor hpfeeds available")
-                return 1
+        import hpfeeds
+        hpc = hpfeeds.new(HOST, PORT, IDENT, SECRET)
 
         # Import cache_event and emit functions to directly communicate with controllers
         from seckc_mhn_api.feeds.controllers import cache_event, sanitize_data
@@ -112,9 +85,6 @@ def main():
         hpc.close()
         return 0
         
-    except ImportError:
-        logger.error("hpfeeds3 not available, falling back to basic operation")
-        return 1
     except Exception as e:
         logger.error(f"HPFeeds relay error: {e}")
         traceback.print_exc()
