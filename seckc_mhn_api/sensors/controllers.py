@@ -10,7 +10,7 @@ from seckc_mhn_api.geocode.controllers import geocodeinternal
 SENSORS_MODULE = Blueprint('sensors', __name__, url_prefix='/sensors')
 
 # Updated to use CHN server instead of old MHN server
-CHN_SENSOR_URL = os.environ.get('CHN_SENSOR_URL', 'http://localhost:8000/api/sensors/')
+CHN_SENSOR_URL = os.environ.get('CHN_SENSOR_URL', 'http://localhost:8000/api/sensor/')
 
 @SENSORS_MODULE.route("/locations", methods=['GET'])
 def sensors():
@@ -18,10 +18,14 @@ def sensors():
     try:
         # Use CHN API endpoint instead of old MHN
         api_key = os.environ.get("CHN_APIKEY", SETTINGS.get("chn", {}).get("apikey", SETTINGS.get("mhn", {}).get("apikey", "")))
-        sensor_url = f"{CHN_SENSOR_URL}?api_key={api_key}"
+        
+        headers = {
+            'apikey': api_key
+        }
         
         sensor_request = requests.get(
-            sensor_url, 
+            CHN_SENSOR_URL, 
+            headers=headers,
             verify=certifi.where(),
             timeout=30
         )
@@ -38,9 +42,20 @@ def sensors():
                     sensor_lookup = geocodeinternal(sensor.get("ip", ""))
                     if sensor_lookup and "traits" in sensor_lookup:
                         del sensor_lookup["traits"]
+                    
+                    # Flatten location structure for frontend compatibility
+                    location_data = sensor_lookup
+                    if sensor_lookup and "location" in sensor_lookup and isinstance(sensor_lookup["location"], dict):
+                        # Extract latitude/longitude from nested structure
+                        nested_location = sensor_lookup["location"]
+                        if "latitude" in nested_location and "longitude" in nested_location:
+                            location_data = dict(sensor_lookup)  # Copy the response
+                            location_data["latitude"] = nested_location["latitude"]
+                            location_data["longitude"] = nested_location["longitude"]
+                    
                     sensor_json.append({
                         "sensor_data": sensor,
-                        "location": sensor_lookup
+                        "location": location_data
                     })
                 except Exception as e:
                     print(f"Error geocoding sensor {sensor.get('ip', 'unknown')}: {e}")
