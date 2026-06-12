@@ -46,6 +46,7 @@ def main():
         # Import cache_event and emit functions to directly communicate with controllers
         from seckc_mhn_api.feeds.controllers import cache_event, sanitize_data
         from seckc_mhn_api.api_base import SOCKET_IO_APP
+        from seckc_mhn_api.feeds.transformers import transform_event
         
         def on_message(identifier, channel, payload):
             """Handle incoming HPFeeds messages."""
@@ -53,12 +54,15 @@ def main():
                 # Parse payload
                 if isinstance(payload, bytes):
                     payload = payload.decode('utf-8', errors='ignore')
-                
+
                 message_data = json.loads(str(payload))
                 message_data['identifier'] = identifier
                 message_data['channel'] = channel
                 message_data['timestamp'] = time.time()
-                
+
+                # Transform dionaea events to visualization-expected format
+                message_data = transform_event(message_data)
+
                 # Cache the event directly and emit via Socket.IO app
                 cache_event(message_data)
                 SOCKET_IO_APP.emit('hpfeedevent', message_data, room='activeUsers')
