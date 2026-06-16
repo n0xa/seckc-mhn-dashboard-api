@@ -2,7 +2,7 @@ FROM alpine:3.22
 
 LABEL maintainer="n0xa"
 LABEL name="seckc-mhn-dashboard-api"
-LABEL version="2.2.0"
+LABEL version="2.2.1"
 LABEL release="1"
 LABEL summary="SecKC MHN Dashboard API server"
 LABEL description="Dashboard API for SecKC MHN (Modern Honey Network) providing real-time honeypot data visualization"
@@ -28,6 +28,12 @@ COPY . /opt/seckc-mhn-dashboard-api/
 
 # Expose port
 EXPOSE 5000
+
+# Add unprivileged user and set ownership
+RUN adduser -D -H -s /sbin/nologin -u 996 seckc-api \
+    && chown -R seckc-api:seckc-api /opt/seckc-mhn-dashboard-api
+
+USER seckc-api
 
 # Run the application
 CMD ["python", "run.py"]
