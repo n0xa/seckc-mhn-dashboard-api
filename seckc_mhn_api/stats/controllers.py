@@ -34,8 +34,8 @@ load_env_file(env_file_path)
 
 # MongoDB connection with error handling
 try:
-    mongo_host = os.environ.get('MONGO_HOST', 'localhost')
-    mongo_port = int(os.environ.get('MONGO_PORT', 27017))
+    mongo_host = os.environ.get('MONGODB_HOST', os.environ.get('MONGO_HOST', 'localhost'))
+    mongo_port = int(os.environ.get('MONGODB_PORT', os.environ.get('MONGO_PORT', 27017)))
     database = os.environ.get('MONGO_DB', 'mnemosyne')
     
     dbconn = MongoClient(host=mongo_host, port=mongo_port, serverSelectionTimeoutMS=5000)
