@@ -60,3 +60,4 @@ venv
 # Test artifacts
 hpfeeds-out.json
 unsupported.json
+.claude/
