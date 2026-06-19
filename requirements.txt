@@ -9,7 +9,8 @@ requests==2.34.2
 certifi==2026.5.20
 python-socketio==5.16.3
 python-engineio==4.13.2
-eventlet==0.41.0
+gevent==24.11.1
+gevent-websocket==0.10.1
 marshmallow==4.3.0
 flask-marshmallow==1.5.0
 Werkzeug==3.1.8

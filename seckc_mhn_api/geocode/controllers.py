@@ -33,21 +33,35 @@ def geocode(ip):
     
     try:
         response = reader.city(ip)
-        return jsonify(response.raw)
+        return jsonify(_city_to_dict(response))
     except geoip2.errors.AddressNotFoundError:
         return jsonify({"error": f"No geolocation data found for IP: {ip}"}), 404
     except Exception as e:
         print(f"Geocoding error for IP {ip}: {e}")
         return jsonify({"error": "Geocoding failed"}), 500
 
+def _city_to_dict(response):
+    return {
+        "city": {"names": response.city.names} if response.city.names else None,
+        "country": {
+            "iso_code": response.country.iso_code,
+            "names": response.country.names,
+        },
+        "location": {
+            "latitude": response.location.latitude,
+            "longitude": response.location.longitude,
+            "time_zone": response.location.time_zone,
+        },
+    }
+
 def geocodeinternal(ip):
     """Internal function for geocoding IPs."""
     if not reader:
         return {"error": "GeoIP database unavailable"}
-    
+
     try:
         response = reader.city(ip)
-        return response.raw
+        return _city_to_dict(response)
     except geoip2.errors.AddressNotFoundError:
         return {"error": f"No geolocation data found for IP: {ip}"}
     except Exception as e:

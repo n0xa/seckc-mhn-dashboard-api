@@ -2,7 +2,7 @@ FROM alpine:3.22
 
 LABEL maintainer="n0xa"
 LABEL name="seckc-mhn-dashboard-api"
-LABEL version="2.2.1"
+LABEL version="2.2.2"
 LABEL release="1"
 LABEL summary="SecKC MHN Dashboard API server"
 LABEL description="Dashboard API for SecKC MHN (Modern Honey Network) providing real-time honeypot data visualization"

@@ -9,7 +9,7 @@ APP = Flask(__name__)
 APP.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-me')
 
 CORS(APP, origins="*", allow_headers=["Content-Type", "Authorization", "Cookie"])
-SOCKET_IO_APP = SocketIO(APP, cors_allowed_origins="*", logger=True, engineio_logger=True)
+SOCKET_IO_APP = SocketIO(APP, cors_allowed_origins="*", async_mode='gevent', logger=True, engineio_logger=True)
 
 from seckc_mhn_api.auth.controllers import AUTH_MODULE
 from seckc_mhn_api.geocode.controllers import GEOCODE_MODULE  
